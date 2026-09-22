@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: bagroute
+      POSTGRES_PASSWORD: bagroute
+      POSTGRES_DB: bagroute
+    ports: ["5444:5432"]
+    volumes: [bagroute_pg:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bagroute -d bagroute"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+  api:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg2://bagroute:bagroute@db:5432/bagroute
+      SEED_ON_EMPTY: "true"
+    ports: ["9300:9300"]
+    depends_on:
+      db:
+        condition: service_healthy
+  frontend:
+    build: ./frontend
+    ports: ["4300:80"]
+    depends_on: [api]
+volumes:
+  bagroute_pg:

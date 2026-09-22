@@ -1,0 +1,258 @@
+:root {
+  --route-soil: #0c100a;
+  --route-leaf: #b6e356;
+  --route-moss: #4f7d3c;
+  --route-bark: #1a2218;
+  --route-muted: #8aa87a;
+  --text: #eef6e8;
+  --panel: #152016;
+  --line: #2e3b2a;
+  --accent: var(--route-leaf);
+  --bag: var(--route-moss);
+  --reject: #d96c4a;
+  --strip: #1a2818;
+  font-family: "Noto Sans SC", "IBM Plex Sans", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--route-soil);
+  color: var(--text);
+  min-height: 100vh;
+}
+a { color: inherit; text-decoration: none; }
+
+/* —— ROUTE STRIP: timeline top | pack table + meters —— */
+.routeboard-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background:
+    linear-gradient(180deg, #142018 0%, var(--route-soil) 28%),
+    var(--route-soil);
+}
+
+.route-strip-chrome {
+  background: var(--strip);
+  border-bottom: 3px solid #3a5030;
+  padding: .65rem 1.1rem 0;
+  box-shadow: 0 8px 24px rgba(0,0,0,.35);
+}
+.route-strip-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .75rem 1.25rem;
+  margin-bottom: .55rem;
+}
+.route-brand {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+}
+.route-brand-mark {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--route-leaf);
+  color: #142008;
+  font-weight: 900;
+  font-size: .75rem;
+  display: grid; place-items: center;
+}
+.route-brand-name { font-weight: 800; font-size: .95rem; color: var(--route-leaf); }
+.route-brand-sub { font-size: .68rem; color: var(--route-muted); }
+.route-pick {
+  display: flex; align-items: center; gap: .4rem;
+  font-size: .8rem; color: var(--route-muted);
+}
+.route-bead-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: auto;
+}
+.route-bead-link {
+  padding: .28rem .65rem;
+  border-radius: 999px;
+  font-size: .75rem;
+  color: var(--route-muted);
+  border: 1px solid #3a4a32;
+  background: #121a10;
+}
+.route-bead-link:hover { color: var(--text); }
+.route-bead-link--on {
+  background: var(--route-leaf);
+  color: #142008;
+  border-color: #d4f08a;
+  font-weight: 700;
+}
+
+/* Stations as beads on a horizontal timeline */
+.stop-timeline {
+  position: relative;
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  padding: 1.1rem 0 1.35rem;
+  min-height: 118px;
+  align-items: flex-start;
+}
+.stop-timeline-rail {
+  position: absolute;
+  left: 0; right: 0;
+  top: 28px;
+  height: 4px;
+  background: linear-gradient(90deg, #3a5030, var(--route-leaf), #3a5030);
+  border-radius: 2px;
+  opacity: .85;
+}
+.stop-timeline-empty {
+  position: relative;
+  z-index: 1;
+  color: var(--route-muted);
+  font-size: .85rem;
+  padding: 1.5rem 0 0 .5rem;
+}
+.stop-bead {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  width: 132px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 4px;
+}
+.stop-bead-dot {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--route-leaf);
+  border: 3px solid #0c1408;
+  box-shadow: 0 0 0 2px var(--route-moss);
+  margin-bottom: 10px;
+}
+.stop-bead-card {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: .15rem .2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: .78rem;
+  text-align: center;
+}
+.stop-bead-card strong { font-size: .82rem; }
+.stop-bead-seq {
+  font-family: "IBM Plex Mono", monospace;
+  color: var(--route-leaf);
+  font-size: .7rem;
+}
+
+.route-twin-lanes {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(220px, .7fr);
+  gap: 0;
+  flex: 1;
+  min-height: 0;
+}
+.pack-plan-lane {
+  padding: 1rem 1.25rem 1.5rem;
+  border-right: 1px solid #2a3824;
+  overflow: auto;
+}
+.meter-lane {
+  padding: 1rem .9rem 1.5rem;
+  background: #0e160e;
+  overflow: auto;
+  border-left: 1px dashed #2e3b2a;
+}
+.lane-eyebrow {
+  font-size: .65rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--route-muted);
+  margin-bottom: .75rem;
+}
+.meter-empty { color: var(--route-muted); font-size: .85rem; }
+.meter-block {
+  margin-bottom: .85rem;
+  padding-bottom: .75rem;
+  border-bottom: 1px solid #24301f;
+}
+.meter-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: .8rem;
+  margin-bottom: .35rem;
+}
+.meter-row {
+  display: grid;
+  grid-template-columns: 18px 1fr 42px;
+  gap: 6px;
+  align-items: center;
+  font-size: .72rem;
+  color: var(--route-muted);
+  margin: .25rem 0;
+}
+.meter-bar {
+  height: 12px;
+  background: #1a2818;
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid #2e3b2a;
+}
+.meter-bar > span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #4f7d3c, var(--route-leaf));
+}
+.meter-bar--vol > span {
+  background: linear-gradient(90deg, #3a6a8a, #7ec8e8);
+}
+
+h2 { margin: 0 0 .85rem; font-size: 1.15rem; color: var(--route-leaf); }
+.toolbar { display: flex; gap: .75rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
+select, input, button {
+  background: var(--panel); color: var(--text); border: 1px solid var(--line);
+  border-radius: 6px; padding: .5rem .75rem; font: inherit;
+}
+button {
+  background: var(--route-leaf); color: #142008; font-weight: 700;
+  border: none; cursor: pointer;
+}
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td {
+  border-bottom: 1px solid var(--line); padding: .5rem .35rem;
+  text-align: left; font-size: .92rem;
+}
+.mono { font-family: "IBM Plex Mono", monospace; }
+.err { color: #ff9b7a; } .ok { color: #b6e356; }
+
+/* page helpers — no card-grid dashboard */
+.route-strip {
+  display: flex; gap: 12px; overflow-x: auto; padding: .5rem 0;
+  align-items: stretch;
+}
+.stop-chip {
+  min-width: 110px;
+  border-left: 3px solid var(--route-leaf);
+  padding: .35rem .55rem;
+  display: flex; flex-direction: column; gap: .15rem;
+  background: transparent;
+}
+.stop-chip .seq { color: var(--route-leaf); font-family: "IBM Plex Mono", monospace; font-size: .8rem; }
+.bag-row { display: flex; gap: 6px; flex-wrap: wrap; margin: .5rem 0 1rem; }
+.bag-block {
+  background: var(--bag); color: white; border-radius: 4px;
+  padding: .45rem .6rem; min-width: 90px; font-size: .85rem;
+}
+.fill { height: 10px; background: #2a3824; border-radius: 2px; overflow: hidden; }
+.fill > span { display: block; height: 100%; background: var(--accent); }
+
+/* stops page: inline weight/volume editing with bag lock */
+.num { width: 90px; font-family: "IBM Plex Mono", monospace; }
+input:disabled, button:disabled { opacity: .45; cursor: not-allowed; }
+.tag-locked { color: #ff9b7a; font-size: .8rem; }
+.tag-free { color: var(--route-muted); font-size: .8rem; }
