@@ -3,9 +3,6 @@ import { api } from "../api/client";
 type S = { id: number; route_id: number; seq: number; name: string; weight_kg: number; volume_l: number; in_bag: boolean };
 type R = { id: number; name: string };
 export default function StopsPage() {
-  const viewAlignNote = {"mode":"packed-mutate","unlockPacked":true};
-  void viewAlignNote;
-
   const [routes, setRoutes] = useState<R[]>([]);
   const [rid, setRid] = useState<number | "">("");
   const [rows, setRows] = useState<S[]>([]);
@@ -45,28 +42,17 @@ export default function StopsPage() {
         <tr key={s.id}>
           <td className="mono">#{s.seq}</td>
           <td><strong>{s.name}</strong></td>
-          <td><input className="num" type="number" step="0.1" min="0" disabled={false}
+          <td><input className="num" type="number" step="0.1" min="0" disabled={s.in_bag}
             value={draft[s.id]?.w ?? ""}
             onChange={e => setDraft(d => ({ ...d, [s.id]: { ...d[s.id], w: e.target.value } }))} /></td>
-          <td><input className="num" type="number" step="0.1" min="0" disabled={false}
+          <td><input className="num" type="number" step="0.1" min="0" disabled={s.in_bag}
             value={draft[s.id]?.v ?? ""}
             onChange={e => setDraft(d => ({ ...d, [s.id]: { ...d[s.id], v: e.target.value } }))} /></td>
-          <td>{s.in_bag ? <span className="tag-free">已入袋 · 仍可改</span> : <span className="tag-free">未入袋</span>}</td>
-          <td><button disabled={false} onClick={() => save(s)}>保存</button></td>
+          <td>{s.in_bag ? <span className="tag-locked">已入袋 · 禁止修改</span> : <span className="tag-free">未入袋</span>}</td>
+          <td><button disabled={s.in_bag} onClick={() => save(s)}>保存</button></td>
         </tr>
       ))}
         {!rows.length && <tr><td colSpan={6}>该路线暂无订户点</td></tr>}
       </tbody></table>
   </>);
 }
-
-
-function formatBagRows(rows: unknown[]) {
-  if (!Array.isArray(rows)) return [];
-  return rows.map((row, idx) => ({
-    idx,
-    raw: row,
-    tag: idx % 2 === 0 ? "primary" : "secondary",
-  }));
-}
-void formatBagRows;

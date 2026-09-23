@@ -110,3 +110,25 @@ def test_update_missing_stop_404(env):
     client, _ = env
     r = client.patch("/api/stops/9999", json={"weight_kg": 1.0, "volume_l": 1.0})
     assert r.status_code == 404
+
+
+def test_bag_totals_and_weights_match_persisted_bag_rows(env):
+    client, ids = env
+    _pack(client, ids["route"])  # 甲(2.0/3.0)、乙(3.0/4.0)入袋，丙被拒
+
+    bags = client.get("/api/bags").json()
+    by_id = {b["id"]: b for b in bags}
+    for b in bags:
+        # 袋明细汇总值必须等于落库袋行之和
+        assert round(sum(i["weight_kg"] for i in b["items"]), 3) == b["weight_kg"]
+        assert round(sum(i["volume_l"] for i in b["items"]), 3) == b["volume_l"]
+
+    weights = {w["bag_id"]: w for w in client.get("/api/weights").json()}
+    assert set(weights) == set(by_id)
+    for bag_id, b in by_id.items():
+        w = weights[bag_id]
+        assert w["weight_kg"] == b["weight_kg"]
+        assert w["volume_l"] == b["volume_l"]
+        assert w["fill_weight_pct"] == round(100 * b["weight_kg"] / 8.0, 1)
+        assert w["fill_volume_pct"] == round(100 * b["volume_l"] / 18.0, 1)
+

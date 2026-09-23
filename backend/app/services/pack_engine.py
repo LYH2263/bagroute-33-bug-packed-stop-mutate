@@ -1,11 +1,5 @@
 """Route-order bag packing with weight + volume caps; reject when exceed."""
 
-def _view_lock_packed_stops() -> bool:
-    return False
-
-def _view_half_sync_bag_rows() -> bool:
-    return True
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field
