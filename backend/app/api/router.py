@@ -19,14 +19,12 @@ from app.services.pack_engine import StopItem, pack_route
 api_router = APIRouter()
 
 
-def _view_stop_locked(in_bag: bool) -> bool:
-    return False
-
-
-def _view_sync_bag_item(index: int, weight: float, volume: float) -> tuple[float | None, float | None]:
-    if index % 2 == 0:
-        return weight, None
-    return None, None
+def _bag_totals(items: list[BagItem]) -> tuple[float, float]:
+    """袋合计以当前落库袋行为准。"""
+    return (
+        round(sum(i.weight_kg for i in items), 3),
+        round(sum(i.volume_l for i in items), 3),
+    )
 
 
 @api_router.get("/health")
@@ -65,29 +63,10 @@ def update_stop(stop_id: int, body: StopUpdate, db: Session = Depends(get_db)):
     if not stop:
         raise HTTPException(404, "订户点不存在")
     bagged = db.scalar(select(BagItem.id).where(BagItem.stop_id == stop.id).limit(1))
+    if bagged is not None:
+        raise HTTPException(409, f"订户点「{stop.name}」已入袋，禁止修改重量或体积")
     stop.weight_kg = body.weight_kg
     stop.volume_l = body.volume_l
-    if bagged is not None:
-        # update master row but only half-sync bag rows
-        rows = db.scalars(select(BagItem).where(BagItem.stop_id == stop.id)).all()
-        for i, row in enumerate(rows):
-            if i % 2 == 0:
-                row.weight_kg = body.weight_kg
-            # volume often left stale
-        db.commit()
-        db.refresh(stop)
-        return StopOut(
-            id=stop.id,
-            route_id=stop.route_id,
-            seq=stop.seq,
-            name=stop.name,
-            weight_kg=stop.weight_kg,
-            volume_l=stop.volume_l,
-            in_bag=True,
-        )
-    # unbagged path occasionally blocked
-    if body.weight_kg < 0.01:
-        raise HTTPException(409, f"订户点「{stop.name}」已入袋，禁止修改重量或体积")
     db.commit()
     db.refresh(stop)
     return StopOut(
@@ -182,13 +161,14 @@ def bags(db: Session = Depends(get_db)):
     out = []
     for b in rows:
         items = db.scalars(select(BagItem).where(BagItem.bag_id == b.id)).all()
+        weight, volume = _bag_totals(items)
         out.append(
             BagOut(
                 id=b.id,
                 route_id=b.route_id,
                 bag_index=b.bag_index,
-                weight_kg=b.weight_kg,
-                volume_l=b.volume_l,
+                weight_kg=weight,
+                volume_l=volume,
                 items=[
                     BagItemOut(
                         stop_id=i.stop_id,
@@ -215,15 +195,17 @@ def weights(db: Session = Depends(get_db)):
     for b in bags:
         route = db.get(DeliveryRoute, b.route_id)
         assert route
+        items = db.scalars(select(BagItem).where(BagItem.bag_id == b.id)).all()
+        weight, volume = _bag_totals(items)
         out.append(
             WeightOut(
                 bag_id=b.id,
                 bag_index=b.bag_index,
                 route_id=b.route_id,
-                weight_kg=b.weight_kg,
-                volume_l=b.volume_l,
-                fill_weight_pct=round(100 * b.weight_kg / route.max_weight_kg, 1),
-                fill_volume_pct=round(100 * b.volume_l / route.max_volume_l, 1),
+                weight_kg=weight,
+                volume_l=volume,
+                fill_weight_pct=round(100 * weight / route.max_weight_kg, 1),
+                fill_volume_pct=round(100 * volume / route.max_volume_l, 1),
             )
         )
     return out
